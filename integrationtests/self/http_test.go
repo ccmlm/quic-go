@@ -178,18 +178,20 @@ var _ = Describe("HTTP tests", func() {
 				Expect(body).To(Equal(PRDataLong))
 			})
 
-			It("downloads many hellos", func() {
-				const num = 150
+			for i := 0; i < 10000; i++ {
+				It("downloads many hellos", func() {
+					const num = 1500
 
-				for i := 0; i < num; i++ {
-					resp, err := client.Get("https://localhost:" + port + "/hello")
-					Expect(err).ToNot(HaveOccurred())
-					Expect(resp.StatusCode).To(Equal(200))
-					body, err := ioutil.ReadAll(gbytes.TimeoutReader(resp.Body, 3*time.Second))
-					Expect(err).ToNot(HaveOccurred())
-					Expect(string(body)).To(Equal("Hello, World!\n"))
-				}
-			})
+					for i := 0; i < num; i++ {
+						resp, err := client.Get("https://localhost:" + port + "/hello")
+						Expect(err).ToNot(HaveOccurred())
+						Expect(resp.StatusCode).To(Equal(200))
+						body, err := ioutil.ReadAll(gbytes.TimeoutReader(resp.Body, 3*time.Second))
+						Expect(err).ToNot(HaveOccurred())
+						Expect(string(body)).To(Equal("Hello, World!\n"))
+					}
+				})
+			}
 
 			It("downloads many files, if the response is not read", func() {
 				const num = 150

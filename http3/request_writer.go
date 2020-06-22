@@ -43,11 +43,13 @@ func (w *requestWriter) WriteRequest(str quic.Stream, req *http.Request, gzip bo
 	wr := bufio.NewWriter(str)
 
 	if err := w.writeHeaders(wr, req, gzip); err != nil {
+		fmt.Println("writing header failed:", err)
 		return err
 	}
 	// TODO: add support for trailers
 	if req.Body == nil {
 		if err := wr.Flush(); err != nil {
+			fmt.Println("flushing failed:", err)
 			return err
 		}
 		str.Close()

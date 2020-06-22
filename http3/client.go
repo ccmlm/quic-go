@@ -189,6 +189,7 @@ func (c *client) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	rsp, rerr := c.doRequest(req, str, reqDone)
 	if rerr.err != nil { // if any error occurred
+		fmt.Printf("doRequest failed: %#v\n", rerr)
 		close(reqDone)
 		if rerr.streamErr != 0 { // if it was a stream error
 			str.CancelWrite(quic.ErrorCode(rerr.streamErr))
@@ -214,11 +215,13 @@ func (c *client) doRequest(
 		requestGzip = true
 	}
 	if err := c.requestWriter.WriteRequest(str, req, requestGzip); err != nil {
+		fmt.Println("WriteRequest failed:", err)
 		return nil, newStreamError(errorInternalError, err)
 	}
 
 	frame, err := parseNextFrame(str)
 	if err != nil {
+		fmt.Println("parsing frame failed", err)
 		return nil, newStreamError(errorFrameError, err)
 	}
 	hf, ok := frame.(*headersFrame)
@@ -230,6 +233,7 @@ func (c *client) doRequest(
 	}
 	headerBlock := make([]byte, hf.Length)
 	if _, err := io.ReadFull(str, headerBlock); err != nil {
+		fmt.Println("reading header block failed", err)
 		return nil, newStreamError(errorRequestIncomplete, err)
 	}
 	hfs, err := c.decoder.DecodeFull(headerBlock)
