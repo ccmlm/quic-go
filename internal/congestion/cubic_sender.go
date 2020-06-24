@@ -1,6 +1,7 @@
 package congestion
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
@@ -99,11 +100,14 @@ func newCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestio
 
 // TimeUntilSend returns when the next packet should be sent.
 func (c *cubicSender) TimeUntilSend(_ protocol.ByteCount) time.Time {
-	return c.pacer.TimeUntilSend()
+	tus := c.pacer.TimeUntilSend()
+	fmt.Println("time until send:", time.Until(tus))
+	return tus
 }
 
 func (c *cubicSender) HasPacingBudget() bool {
-	return c.pacer.Budget(c.clock.Now()) >= maxDatagramSize
+	budget := c.pacer.Budget(c.clock.Now())
+	return budget >= maxDatagramSize
 }
 
 func (c *cubicSender) OnPacketSent(
